@@ -2,6 +2,69 @@
 @{
     ViewBag.Title = "index4";
 }
+<head>
+    <style>
+        body {
+            margin: 0px;
+            padding: 0px;
+        }
 
+    </style>
+</head>
+<body background="~/Content/Images/mapDisp.png" style="background-size:100% 100%; background-attachment:fixed; width:100%; height:100%; overflow: hidden;">
+    
+    <canvas id="canvas" style="position:absolute"></canvas>
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script src="~/Scripts/bootstrap.min.js"></script>
+
+    <script>
+        canvas.setAttribute('width', window.innerWidth)
+        canvas.setAttribute('height', window.innerHeight)
+        var old_lon;
+        var old_lat;
+        var c = document.getElementById("canvas").getContext("2d");
+        lon = ((@ViewBag.lon + 180) * (window.innerWidth / 360));
+        lat = ((@ViewBag.lat + 90) * (window.innerHeight / 180));
+        c.beginPath();
+        c.arc(lon, lat, 6, 0, 2 * Math.PI);
+        c.stroke();
+        c.fillStyle = "red";
+        c.fill();
+        old_lon = lon;
+        old_lat = lat;
+
+        myTimer = (function () {
+            $.post("@Url.Action("GetNextLocationFromFile")").done(function (xml) {
+            var xmlDoc = $.parseXML(xml);
+            $xml = $(xmlDoc);
+            lon = parseFloat($xml.find("Lon").text());
+            lat = parseFloat($xml.find("Lat").text());
+            if (lon === 1000) {
+                stop();
+            } else {
+                var temp_lon = ((lon + 180) * (window.innerWidth / 360));
+                var temp_lat = ((lat + 90) * (window.innerHeight / 180));
+                c.beginPath();
+                c.lineWidth = 1;
+                c.moveTo(old_lon, old_lat);
+                c.lineTo(temp_lon, temp_lat);
+                c.strokeStyle = "red";
+                c.stroke();
+                c.closePath();
+                old_lon = temp_lon;
+                old_lat = temp_lat;
+            }
+        });
+        });
+        IntervalTime = @ViewBag.time * 1000;
+        interval = setInterval(myTimer, IntervalTime);
+        myTimer();
+         stop = (function () {
+             clearInterval(interval);
+             alert("Done");
+        });
+
+    </script>
+</body>
 <h2>index4</h2>
 
