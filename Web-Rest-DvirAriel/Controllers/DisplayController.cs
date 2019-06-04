@@ -106,7 +106,7 @@ namespace Web_Rest_DvirAriel.Controllers
         public string GetNextLocationFromFile() {
             string[] lines = (string[])Session["lines"];
             string nextLine = lines[0];
-            Session["lines"] = lines.Skip(1);
+            Session["lines"] = lines.Skip(1).ToArray();
             LocationInfo info = new LocationInfo {
                 Lat = 1000,
                 Lon = 1000
