@@ -74,14 +74,19 @@ namespace Web_Rest_DvirAriel.Models {
             LocationInfo info = new LocationInfo();
             info.Lon = requestInfo("get /position/longitude-deg\r\n");
             info.Lat = requestInfo("get /position/latitude-deg\r\n");
+            info.Rudder = requestInfo("get /controls/flight/rudder\r\n");
+            info.Throttle = requestInfo("get /controls/engines/current-engine/throttle\r\n");
+            info.Heading = requestInfo("get /instrumentation/heading-indicator/indicated-heading-deg\r\n");
             return info;
         }
     }
 
     public class LocationInfo {
         public double Lat { get; set; }
-
         public double Lon { get; set; }
+        public double Rudder { get; set; }
+        public double Throttle { get; set; }
+        public double Heading { get; set; }
 
         public void ToXml(XmlWriter writer) {
             writer.WriteStartElement("InfoLocation");

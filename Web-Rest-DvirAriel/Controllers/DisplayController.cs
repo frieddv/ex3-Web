@@ -58,13 +58,25 @@ namespace Web_Rest_DvirAriel.Controllers
         // GET: Display
         [HttpGet]
         public ActionResult Index3(string IP, int port, int rate, int length, string filename) {
+            FileHandler fileHandler = new FileHandler();
             var location = new LocationSampler(IP, port).GetCurrentInfo();
             ViewBag.lon = location.Lon;
             ViewBag.lat = location.Lat;
             ViewBag.rate = rate;
             ViewBag.length = length;
-            ViewBag.filename = filename;
+            @Session["filename"] = filename;
+            fileHandler.DeletFile(AppDomain.CurrentDomain.BaseDirectory + @"\" + Session["filename"] + ".txt");
             return View();
+        }
+
+        // POST: SAVE
+        [HttpPost]
+        public string SaveToFile() {
+            string filePath = AppDomain.CurrentDomain.BaseDirectory + @"\" + @Session["filename"] + ".txt";
+            LocationInfo info = LocationSampler.Instance.GetCurrentInfo();
+            FileHandler fileHandler = new FileHandler();
+            fileHandler.SaveToFile(info, filePath);
+            return ToXml(info);
         }
 
         // GET: Display
@@ -81,7 +93,7 @@ namespace Web_Rest_DvirAriel.Controllers
                 ViewBag.lon = Convert.ToDouble(values[0]);
                 ViewBag.lat = Convert.ToDouble(values[1]);
             }
-            Session["lines"] = lines;
+            @Session["lines"] = lines;
             return View();
         }
 
@@ -96,8 +108,8 @@ namespace Web_Rest_DvirAriel.Controllers
             string nextLine = lines[0];
             Session["lines"] = lines.Skip(1);
             LocationInfo info = new LocationInfo {
-                Lat = 100,
-                Lon = 0
+                Lat = 1000,
+                Lon = 1000
             };
             var values = nextLine.Split(',');
             if (values[0] != endMarker) {
@@ -106,8 +118,8 @@ namespace Web_Rest_DvirAriel.Controllers
                     info.Lat = Convert.ToDouble(values[1]);
                 }
                 catch (Exception) {
-                    info.Lat = 100;
-                    info.Lon = 0;
+                    info.Lat = 1000;
+                    info.Lon = 1000;
                 }
             }
             return ToXml(info);
