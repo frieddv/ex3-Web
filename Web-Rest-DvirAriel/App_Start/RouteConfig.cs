@@ -36,8 +36,8 @@ namespace Web_Rest_DvirAriel
 
             routes.MapRoute(
                 name: "Default",
-                url: "{IPOrFile}/{param2}/{param3}",
-                defaults: new { controller = "Display", action = "Index", param3 = UrlParameter.Optional }
+                url: "{controller}/{action}/{id}",
+                defaults: new { controller = "Display", action = "Index", id = UrlParameter.Optional }
             );
         }
     }

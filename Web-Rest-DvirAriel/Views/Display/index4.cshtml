@@ -32,7 +32,10 @@
         c.fill();
         old_lon = lon;
         old_lat = lat;
-
+        stop = (function () {
+            clearInterval(interval);
+            alert("Done");
+        });
         myTimer = (function () {
             $.post("@Url.Action("GetNextLocationFromFile")").done(function (xml) {
             var xmlDoc = $.parseXML(xml);
@@ -59,10 +62,7 @@
         IntervalTime = @ViewBag.time * 1000;
         interval = setInterval(myTimer, IntervalTime);
         myTimer();
-         stop = (function () {
-             clearInterval(interval);
-             alert("Done");
-        });
+       
 
     </script>
 </body>
