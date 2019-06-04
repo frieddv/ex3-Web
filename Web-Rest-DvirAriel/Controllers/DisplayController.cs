@@ -85,6 +85,11 @@ namespace Web_Rest_DvirAriel.Controllers
             return View();
         }
 
+        // GET: Home/default
+        public ActionResult Index() {
+            return View();
+        }
+
         [HttpPost]
         public string GetNextLocationFromFile() {
             string[] lines = (string[])Session["lines"];
