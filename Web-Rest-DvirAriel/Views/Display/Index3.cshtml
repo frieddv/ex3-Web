@@ -49,7 +49,7 @@
                 old_lat = temp_lat;
             });
         });
-        EndTime = @ViewBag.duration * 1000;
+        EndTime = @ViewBag.length * 1000;
         IntervalTime = @ViewBag.rate * 1000;
         setTimeout(stop, EndTime);
         interval = setInterval(myTimer, IntervalTime);
