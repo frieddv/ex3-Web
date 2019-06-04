@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Web;
 using System.Web.Mvc;
@@ -10,20 +11,10 @@ using Web_Rest_DvirAriel.Models;
 namespace Web_Rest_DvirAriel.Controllers
 {
     public class DisplayController : Controller {
-        private bool IsValidIP(string ipstring) {
-            if (String.IsNullOrWhiteSpace(ipstring)) {
-                return false;
-            }
-            string[] split = ipstring.Split('.');
-            if (split.Length != 4)
-                return false;
-            byte result;
-            return split.All(r => byte.TryParse(r, out result));
-
-        }
+        private string endMarker = "END";
 
         [HttpPost]
-        public string getArgs() {
+        public string GetArgs() {
             var info = LocationSampler.Instance.GetCurrentInfo();
             return ToXml(info);
         }
@@ -45,39 +36,76 @@ namespace Web_Rest_DvirAriel.Controllers
             return sb.ToString();
         }
 
-        //todo: all the views over here needed to be change, fter we will create the right views for everyone
-
         // GET: Display
-        public ActionResult Index14(string IPOrFilename, int portOrRate) {
-            if (IsValidIP(IPOrFilename)) {
-                //maybe instead opening singleton that will connect as client to the flightgear
-                ViewBag.IP = System.Net.IPAddress.Parse(IPOrFilename);
-                ViewBag.port = portOrRate;
-                Implement this!! //for the IP assignment
-            }
-            else {
-                ViewBag.filename = IPOrFilename;
-                ViewBag.rate = portOrRate;
-                Implement this!! //for the file reading assignment
-            }
+        [HttpGet]
+        public ActionResult Index1(int IP1, int IP2, int IP3, int IP4, int port) {
+            string IP = IP1 + "." + IP2 + "." + IP3 + "." + IP4;
+            var location = new LocationSampler(IP, port).GetCurrentInfo();
+            ViewBag.lon = location.Lon;
+            ViewBag.lat = location.Lat;
             return View();
         }
 
-        //todo: returning the right view
+        // GET: Display
+        [HttpGet]
         public ActionResult Index2(string IP, int port, int rate) {
-            ViewBag.IP = IP;
-            ViewBag.port = port;
+            var location = new LocationSampler(IP, port).GetCurrentInfo();
+            ViewBag.lon = location.Lon;
+            ViewBag.lat = location.Lat;
             ViewBag.rate = rate;
             return View();
         }
-        //todo: returning the right view
+        // GET: Display
+        [HttpGet]
         public ActionResult Index3(string IP, int port, int rate, int length, string filename) {
-            ViewBag.IP = IP;
-            ViewBag.port = port;
+            var location = new LocationSampler(IP, port).GetCurrentInfo();
+            ViewBag.lon = location.Lon;
+            ViewBag.lat = location.Lat;
             ViewBag.rate = rate;
             ViewBag.length = length;
             ViewBag.filename = filename;
             return View();
+        }
+
+        // GET: Display
+        [HttpGet]
+        public ActionResult Index4(string fileName, int rate) {
+            ViewBag.rate = rate;
+            string path = AppDomain.CurrentDomain.BaseDirectory + @"\" + fileName + ".txt";
+            string[] lines = System.IO.File.ReadAllLines(path);
+            Array.Resize(ref lines, lines.Length + 1);
+            lines[lines.Length - 1] = endMarker;
+            string[] values = lines[0].Split(',');
+            if (values[0] != endMarker) {
+                lines = lines.Skip(1).ToArray();
+                ViewBag.lon = Convert.ToDouble(values[0]);
+                ViewBag.lat = Convert.ToDouble(values[1]);
+            }
+            Session["lines"] = lines;
+            return View();
+        }
+
+        [HttpPost]
+        public string GetNextLocationFromFile() {
+            string[] lines = (string[])Session["lines"];
+            string nextLine = lines[0];
+            Session["lines"] = lines.Skip(1);
+            LocationInfo info = new LocationInfo {
+                Lat = 100,
+                Lon = 0
+            };
+            var values = nextLine.Split(',');
+            if (values[0] != endMarker) {
+                try {
+                    info.Lon = Convert.ToDouble(values[0]);
+                    info.Lat = Convert.ToDouble(values[1]);
+                }
+                catch (Exception) {
+                    info.Lat = 100;
+                    info.Lon = 0;
+                }
+            }
+            return ToXml(info);
         }
     }
 }
